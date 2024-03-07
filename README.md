@@ -6,7 +6,7 @@
 
 List of things to implement
 
-- sterowanie postacią za pomocą klawiatury,
+~~- sterowanie postacią za pomocą klawiatury,~~
 - obliczanie i zadawanie obrażeń na podstawie statystyk podstawowych i statystyk
 przedmiotów,
 - dostępność kilku postaci oraz przeciwników o rożnych mechanikach (np. wrogowie skaczący

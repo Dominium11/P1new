@@ -1,23 +1,35 @@
 #include <SFML/Graphics.hpp>
+#include "Player.h"
+
+using namespace sf;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "pp-projekt-gra");
+    window.setFramerateLimit(144);
 
+    Player player("./Sprites/player.jpg", 100, 100);
+    Clock clock;
     while (window.isOpen())
     {
-        sf::Event event;
+        Event event;
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed)
-                window.close();
+            switch (event.type) {
+                case Event::Closed:
+                    window.close();
+                    break;
+                default:
+                    break;
+            }
         }
 
+        player.Update(window);
+
         window.clear();
-        window.draw(shape);
+        window.draw(player.sprite);
         window.display();
+        Time elapsed = clock.restart();
     }
 
     return 0;
