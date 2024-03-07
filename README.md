@@ -19,7 +19,7 @@ pojawiających się w falach (plansza bez pomieszczeń, losowy przedmiot znajduj
 na końcu fali),
 - zróżnicowana mechanika ataków, zależna od typu postaci (ataki zasięgowe i broń biała).
 
-##Optional tasks after main list is done
+Optional tasks after main list is done
 
 - kooperacja dwóch graczy na zasadzie wyboru dwóch postaci i równoczesnego
 sterowania obiema postaciami za pomocą tej samej klawiatury (w takim wypadku
