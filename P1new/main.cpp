@@ -92,11 +92,18 @@ int main()
                     break;
             }
         }
+
+        sf::View playerView(sf::FloatRect(player.hitbox.getPosition().x - 950.f, player.hitbox.getPosition().y - 550.f, 1900.f, 1100.f));
+        playerView.zoom(1.5f);
+        playerView.setViewport(sf::FloatRect(0.f, 0.f, 1.f, 1.f));
+
         player.Update(window, level);
         for (unsigned int i = 0; i < level.enemies.size(); i++) {
             level.enemies[i].Update(window, level);
             std::cout << level.enemies[i].sprite.getPosition().y << std::endl;
         }
+
+        window.setView(playerView);
 
         window.clear();
         for (std::vector row : level.walls) {
