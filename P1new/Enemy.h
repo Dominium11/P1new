@@ -23,7 +23,7 @@ private:
 	sf::Texture texture;
 	int sizeX, sizeY;
 	short int horizontal = 0, vertical = 0;
-	const double diagMod = 0.707106; ///Sin(45) to make angular movement match non-angular movement
+	double diagMod = 0.707106; ///Sin(45) to make angular movement match non-angular movement
 };
 
 #endif

@@ -39,21 +39,17 @@ void Player::Update(sf::RenderWindow &window, Level level) {
 	}
 
 	sf::FloatRect overlap;
+	sf::FloatRect collisionNormal;
 	sf::FloatRect playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
-	for (int i = 0; i < level.walls.size(); i++)
+	for (Wall wall : level.walls)
 	{
-		sf::FloatRect collisionNormal;
-		for (int j = 0; j < level.walls[i].size(); j++)
-		{
-			if(level.walls[i][j].collider.getGlobalBounds().intersects(playerBounds, overlap)){
-				collisionNormal = overlap;
-				resolveCollision(overlap, level.walls[i][j].collider);
-				playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
-			}
+		if(wall.collider.getGlobalBounds().intersects(playerBounds, overlap)){
+			collisionNormal = overlap;
+			resolveCollision(overlap, wall.collider);
+			playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
 		}
 	}
 	for (Enemy enemy : level.enemies) {
-		sf::FloatRect collisionNormal;
 		if (enemy.hitbox.getGlobalBounds().intersects(playerBounds, overlap)) {
 			collisionNormal = overlap;
 			resolveCollision(overlap, enemy.hitbox);

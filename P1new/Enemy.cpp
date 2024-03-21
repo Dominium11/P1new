@@ -52,13 +52,10 @@ void Enemy::Update(sf::RenderWindow& window, Level level) {
 	for (int i = 0; i < level.walls.size(); i++)
 	{
 		sf::FloatRect collisionNormal;
-		for (int j = 0; j < level.walls.size(); j++)
-		{
-			if (level.walls[i][j].collider.getGlobalBounds().intersects(enemyBounds, overlap)) {
-				collisionNormal = overlap;
-				resolveCollision(overlap, level.walls[i][j].collider);
-				enemyBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
-			}
+		if (level.walls[i].collider.getGlobalBounds().intersects(enemyBounds, overlap)) {
+			collisionNormal = overlap;
+			resolveCollision(overlap, level.walls[i].collider);
+			enemyBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
 		}
 	}
 };

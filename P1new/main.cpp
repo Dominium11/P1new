@@ -4,6 +4,7 @@
 #include "Level.h"
 #include <fstream>
 #include <iostream>
+#include <random>
 using namespace sf;
 
 /// <summary>
@@ -54,31 +55,53 @@ int main()
     window.setFramerateLimit(144);
 
     std::ifstream MyFile("Level1.map");
-
     Clock clock;
     Player player("./Sprites/player.jpg", 100, 100, 700, 700, clock);
 
+    std::random_device rand;
+    std::mt19937 rng(rand());
+    std::uniform_int_distribution<std::mt19937::result_type> dist6(1, 2); // distribution in range [1, 6]
+    for (int am = 0; am < 2; am ++) {
+        for (int i = 0; i < 2 * 3; i++) {
+            for (int j = 0; j < 2 * 3; j++) {
+                std::cout << j;
+            }
+            std::cout << std::endl;
+        }
+    }
+
     int levelWidth = 38;
     int levelHeight = 22;
-    Level level(levelWidth, levelHeight);
+    Level level;
     std::string levelTemplate;
-    for(int i = 0; i < levelHeight; i++){
-        std::getline(MyFile, levelTemplate);
-        for (int j = 0; j < levelWidth; j++) {
-            if (levelTemplate[j] == '.') {
-                Wall newWall;
-                level.walls[j][i] = newWall;
+    int mapSize = 5;
+    for (int mapHeight = -mapSize; mapHeight < mapSize; mapHeight++) {
+        for (int mapWidth = -mapSize; mapWidth < mapSize; mapWidth++) {
+            for (int i = 0; i < levelHeight; i++) {
+                std::getline(MyFile, levelTemplate);
+                for (int j = 0; j < levelWidth; j++) {
+                    if (levelTemplate[j] == '#') {
+                        Wall newWall(50, 50, 50 * j + 1900 * mapWidth, 50 * i + 1100 * mapHeight, sf::Color::Red);
+                        level.walls.push_back(newWall);
+                    }
+                    else if (levelTemplate[j] == 'E') {
+                        Enemy newEnemy("./Sprites/enemy.jpg", 100, 100, 50 * j + 1900 * mapWidth, 50 * i + 1100 * mapHeight, clock);
+                        level.enemies.push_back(newEnemy);
+                    }
+                }
             }
-            else if (levelTemplate[j] == '#') {
-                Wall newWall(50, 50, 50 * j, 50*i, sf::Color::Red);
-                level.walls[j][i] = newWall;
-            }
-            else if (levelTemplate[j] == 'E') {
-                Enemy newEnemy("./Sprites/enemy.jpg", 100, 100, 50 * j, 50 * i, clock);
-                level.enemies.push_back(newEnemy);
+            MyFile.close();
+            switch (dist6(rng)) {
+            case 1:
+                MyFile.open("Level2.map");
+                break;
+            case 2:
+                MyFile.open("Level1.map");
+                break;
             }
         }
     }
+
     while (window.isOpen())
     {
         Event event;
@@ -98,21 +121,18 @@ int main()
         playerView.setViewport(sf::FloatRect(0.f, 0.f, 1.f, 1.f));
 
         player.Update(window, level);
-        for (unsigned int i = 0; i < level.enemies.size(); i++) {
-            level.enemies[i].Update(window, level);
-            std::cout << level.enemies[i].sprite.getPosition().y << std::endl;
+        for (Enemy enemy : level.enemies) {
+            enemy.Update(window, level);
         }
 
         window.setView(playerView);
 
         window.clear();
-        for (std::vector row : level.walls) {
-            for (Wall wall : row) {
-                window.draw(wall);
-            }
+        for (Wall wall : level.walls) {
+            window.draw(wall);
         }
-        for (unsigned int i = 0; i < level.enemies.size(); i++) {
-            window.draw(level.enemies[i]);
+        for (Enemy enemy : level.enemies) {
+            window.draw(enemy);
         }
         window.draw(player.sprite);
         window.display();

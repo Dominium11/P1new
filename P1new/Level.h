@@ -6,14 +6,10 @@
 
 class Enemy;
 
-typedef std::vector<std::vector<Wall>> Matrix;
-typedef std::vector<Wall> Row;
-
 class Level
 {
 	public:
-		Level(int width, int height);
-		int width, height;
-		Matrix walls;
+		Level();
+		std::vector<Wall> walls;
 		std::vector<Enemy> enemies;
 };
