@@ -2,6 +2,7 @@
 #include <SFML/System.hpp>
 #include "Player.h"
 #include "Level.h"
+#include "TileMap.h"
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -51,16 +52,17 @@ unsigned char* readBMP(char* filename)
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(1900, 1100), "pp-projekt-gra");
+    sf::RenderWindow window(sf::VideoMode(1024, 1024), "pp-projekt-gra");
     window.setFramerateLimit(144);
 
-    std::ifstream MyFile("Level1.map");
+    std::ifstream MyFile("Level1.map"); // Top left level
     Clock clock;
     Player player("./Sprites/player.jpg", 100, 100, 700, 700, clock);
+    sf::View playerView;
 
     std::random_device rand;
     std::mt19937 rng(rand());
-    std::uniform_int_distribution<std::mt19937::result_type> dist6(1, 2); // distribution in range [1, 6]
+    std::uniform_int_distribution<std::mt19937::result_type> dist6(1, 2); // amount of levels
     for (int am = 0; am < 2; am ++) {
         for (int i = 0; i < 2 * 3; i++) {
             for (int j = 0; j < 2 * 3; j++) {
@@ -102,6 +104,23 @@ int main()
         }
     }
 
+    // define the level with an array of tile indices
+    const int level2[] =
+    {
+        0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+        0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0,
+        1, 1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3,
+        0, 1, 0, 0, 2, 0, 3, 3, 3, 0, 1, 1, 1, 0, 0, 0,
+        0, 1, 1, 0, 3, 3, 3, 0, 0, 0, 1, 1, 1, 2, 0, 0,
+        0, 0, 1, 0, 3, 0, 2, 2, 0, 0, 1, 1, 1, 1, 2, 0,
+        2, 0, 1, 0, 3, 0, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1,
+        0, 0, 1, 0, 3, 2, 2, 2, 0, 0, 0, 0, 1, 1, 1, 1,
+    };
+
+    TileMap map;
+    if (!map.load("./Sprites/tileset.png", sf::Vector2u(64, 64), level2, 16, 8))
+        return -1;
+
     while (window.isOpen())
     {
         Event event;
@@ -116,11 +135,11 @@ int main()
             }
         }
 
-        sf::View playerView(sf::FloatRect(player.hitbox.getPosition().x - 950.f, player.hitbox.getPosition().y - 550.f, 1900.f, 1100.f));
+        playerView.reset(sf::FloatRect(player.hitbox.getPosition().x - 512.f, player.hitbox.getPosition().y - 512.f, 1024.f, 1024.f));
         playerView.zoom(1.5f);
         playerView.setViewport(sf::FloatRect(0.f, 0.f, 1.f, 1.f));
 
-        player.Update(window, level, playerView);
+        player.Update(window, map, playerView);
         //for (Enemy enemy : level.enemies) {
         //    enemy.Update(window, level);
         //}
@@ -132,7 +151,7 @@ int main()
         sf::Vector2f viewCenter(playerView.getCenter());
         sf::Vector2f viewSize(playerView.getSize());
         sf::FloatRect currentViewRect(viewCenter - viewSize / 2.f, viewSize);
-        for (Wall wall : level.walls) {
+        /*for (Wall wall : level.walls) {
             auto rect = wall.collider.getGlobalBounds();
             if (rect.intersects(currentViewRect)) {
                 window.draw(wall);
@@ -143,7 +162,8 @@ int main()
             if (rect.intersects(currentViewRect)) {
                 window.draw(enemy);
             }
-        }
+        }*/
+        window.draw(map);
         window.draw(player.sprite);
         window.display();
 

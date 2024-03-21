@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "Wall.h"
-#include "Level.h"
+#include "TileMap.h"
 
 #ifndef MY_HEADER_FILE_
 #define MY_HEADER_FILE_
@@ -8,15 +8,15 @@
 class Player
 {
 	public:
-		double movementSpeed = 5;
+		double movementSpeed = 10;
 		sf::RectangleShape hitbox;
 		sf::Sprite sprite;
 		Player(std::string spritePath, int sizeX, int sizeY, int posX, int posY, sf::Clock &clock);
-		void Update(sf::RenderWindow& window, Level level, sf::View playerView);
+		void Update(sf::RenderWindow& window, TileMap level, sf::View playerView);
 	private:
 		//Resolves collision with sf::Shape objects by taking current movement axis
 		sf::Clock clock;
-		void resolveCollision(sf::FloatRect collisionNormal, sf::RectangleShape);
+		void resolveCollision(sf::FloatRect collisionNormal, sf::FloatRect);
 		sf::Texture texture;
 		int sizeX, sizeY;
 		short int horizontal = 0, vertical = 0;
