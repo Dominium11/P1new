@@ -21,7 +21,7 @@ sizeY(sizeY), sizeX(sizeX), clock(clock)
 	}
 };
 
-void Player::Update(sf::RenderWindow &window, Level level) {
+void Player::Update(sf::RenderWindow &window, Level level, sf::View playerView) {
 	horizontal = 0;
 	vertical = 0;
 	if (Keyboard::isKeyPressed(Keyboard::A)) horizontal -= 1;
@@ -38,22 +38,31 @@ void Player::Update(sf::RenderWindow &window, Level level) {
 		hitbox.move(horizontal * movementSpeed, vertical * movementSpeed);
 	}
 
+	sf::Vector2f viewCenter(playerView.getCenter());
+	sf::Vector2f viewSize(playerView.getSize());
+	sf::FloatRect currentViewRect(viewCenter - viewSize / 2.f, viewSize);
+
 	sf::FloatRect overlap;
 	sf::FloatRect collisionNormal;
 	sf::FloatRect playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
-	for (Wall wall : level.walls)
-	{
-		if(wall.collider.getGlobalBounds().intersects(playerBounds, overlap)){
-			collisionNormal = overlap;
-			resolveCollision(overlap, wall.collider);
-			playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
+	for (Wall wall : level.walls){
+		auto rect = wall.collider.getGlobalBounds();
+		if (rect.intersects(currentViewRect)) {
+			if (wall.collider.getGlobalBounds().intersects(playerBounds, overlap)) {
+				collisionNormal = overlap;
+				resolveCollision(overlap, wall.collider);
+				playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
+			}
 		}
 	}
 	for (Enemy enemy : level.enemies) {
-		if (enemy.hitbox.getGlobalBounds().intersects(playerBounds, overlap)) {
-			collisionNormal = overlap;
-			resolveCollision(overlap, enemy.hitbox);
-			playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
+		auto rect = enemy.hitbox.getGlobalBounds();
+		if (rect.intersects(currentViewRect)) {
+			if (enemy.hitbox.getGlobalBounds().intersects(playerBounds, overlap)) {
+				collisionNormal = overlap;
+				resolveCollision(overlap, enemy.hitbox);
+				playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
+			}
 		}
 	}
 };

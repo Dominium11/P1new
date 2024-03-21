@@ -120,19 +120,29 @@ int main()
         playerView.zoom(1.5f);
         playerView.setViewport(sf::FloatRect(0.f, 0.f, 1.f, 1.f));
 
-        player.Update(window, level);
-        for (Enemy enemy : level.enemies) {
-            enemy.Update(window, level);
-        }
+        player.Update(window, level, playerView);
+        //for (Enemy enemy : level.enemies) {
+        //    enemy.Update(window, level);
+        //}
 
         window.setView(playerView);
 
         window.clear();
+
+        sf::Vector2f viewCenter(playerView.getCenter());
+        sf::Vector2f viewSize(playerView.getSize());
+        sf::FloatRect currentViewRect(viewCenter - viewSize / 2.f, viewSize);
         for (Wall wall : level.walls) {
-            window.draw(wall);
+            auto rect = wall.collider.getGlobalBounds();
+            if (rect.intersects(currentViewRect)) {
+                window.draw(wall);
+            }
         }
         for (Enemy enemy : level.enemies) {
-            window.draw(enemy);
+            auto rect = enemy.hitbox.getGlobalBounds();
+            if (rect.intersects(currentViewRect)) {
+                window.draw(enemy);
+            }
         }
         window.draw(player.sprite);
         window.display();
