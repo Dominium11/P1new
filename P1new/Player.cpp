@@ -21,7 +21,7 @@ sizeY(sizeY), sizeX(sizeX), clock(clock)
 	}
 };
 
-void Player::Update(sf::RenderWindow &window, TileMap level, sf::View playerView) {
+void Player::Update(sf::RenderWindow &window, TileMap map[2], sf::View playerView) {
 	horizontal = 0;
 	vertical = 0;
 	if (Keyboard::isKeyPressed(Keyboard::A)) horizontal -= 1;
@@ -46,24 +46,34 @@ void Player::Update(sf::RenderWindow &window, TileMap level, sf::View playerView
 	sf::FloatRect collisionNormal;
 	sf::FloatRect playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
 	
-	int offset = -1;
-	for (int i = 0; i < level.getVertices().getVertexCount(); i+=6) {
-		sf::VertexArray vertices = level.getVertices();
-		std::vector<int> tileIds = level.getTileIds();
-		if (((i / 6) % 16 == 0)) {
-			offset += 1;
-		}
-		int tileId = tileIds[((level.height * (i/6)) % ( level.width * level.height)) + offset];
-		auto rect = level.getVertices().getBounds();
-		sf::FloatRect boundingBox(vertices[i].position.x, vertices[i].position.y, vertices[i + 1].position.x - vertices[i].position.x, vertices[i + 2].position.y - vertices[i].position.y);
-		//if (rect.intersects(currentViewRect)){
-			if (boundingBox.intersects(playerBounds, overlap) && tileId == 0) {
-				collisionNormal = overlap;
-				resolveCollision(overlap, boundingBox);
-				playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
+	for (int m = 0; m < 36; m++) {
+		TileMap level = map[m];
+		int offset = -1;
+		for (int i = 0; i < level.getVertices().getVertexCount(); i += 6) {
+			std::vector<int> tileIds = level.getTileIds();
+			int tileId = tileIds[((level.height * (i / 6)) % (level.width * level.height)) + offset];
+			if (tileId != 0) {
+				if (((i / 6) % level.width == 0)) {
+					offset += 1;
+				}
+				continue;
 			}
-		//}
+			sf::VertexArray vertices = level.getVertices();
+			if (((i / 6) % level.width == 0)) {
+				offset += 1;
+			}
+			auto rect = level.getVertices().getBounds();
+			sf::FloatRect boundingBox(vertices[i].position.x, vertices[i].position.y, vertices[i + 1].position.x - vertices[i].position.x, vertices[i + 2].position.y - vertices[i].position.y);
+			if (boundingBox.intersects(currentViewRect)) {
+				if (boundingBox.intersects(playerBounds, overlap) && tileId == 0) {
+					collisionNormal = overlap;
+					resolveCollision(overlap, boundingBox);
+					playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
+				}
+			}
+		}
 	}
+
 	/*for (Enemy enemy : level.enemies) {
 		auto rect = enemy.hitbox.getGlobalBounds();
 		if (rect.intersects(currentViewRect)) {

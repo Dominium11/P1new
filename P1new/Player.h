@@ -12,7 +12,7 @@ class Player
 		sf::RectangleShape hitbox;
 		sf::Sprite sprite;
 		Player(std::string spritePath, int sizeX, int sizeY, int posX, int posY, sf::Clock &clock);
-		void Update(sf::RenderWindow& window, TileMap level, sf::View playerView);
+		void Update(sf::RenderWindow& window, TileMap level[2], sf::View playerView);
 	private:
 		//Resolves collision with sf::Shape objects by taking current movement axis
 		sf::Clock clock;

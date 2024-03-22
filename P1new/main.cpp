@@ -62,64 +62,35 @@ int main()
 
     std::random_device rand;
     std::mt19937 rng(rand());
-    std::uniform_int_distribution<std::mt19937::result_type> dist6(1, 2); // amount of levels
-    for (int am = 0; am < 2; am ++) {
-        for (int i = 0; i < 2 * 3; i++) {
-            for (int j = 0; j < 2 * 3; j++) {
-                std::cout << j;
-            }
-            std::cout << std::endl;
-        }
-    }
+    std::uniform_int_distribution<std::mt19937::result_type> dist6(0, 19); // amount of levels
 
-    int levelWidth = 38;
-    int levelHeight = 22;
-    Level level;
-    std::string levelTemplate;
-    int mapSize = 5;
-    for (int mapHeight = -mapSize; mapHeight < mapSize; mapHeight++) {
-        for (int mapWidth = -mapSize; mapWidth < mapSize; mapWidth++) {
-            for (int i = 0; i < levelHeight; i++) {
-                std::getline(MyFile, levelTemplate);
-                for (int j = 0; j < levelWidth; j++) {
-                    if (levelTemplate[j] == '#') {
-                        Wall newWall(50, 50, 50 * j + 1900 * mapWidth, 50 * i + 1100 * mapHeight, sf::Color::Red);
-                        level.walls.push_back(newWall);
-                    }
-                    else if (levelTemplate[j] == 'E') {
-                        Enemy newEnemy("./Sprites/enemy.jpg", 100, 100, 50 * j + 1900 * mapWidth, 50 * i + 1100 * mapHeight, clock);
-                        level.enemies.push_back(newEnemy);
-                    }
-                }
-            }
-            MyFile.close();
-            switch (dist6(rng)) {
-            case 1:
-                MyFile.open("Level2.map");
-                break;
-            case 2:
-                MyFile.open("Level1.map");
-                break;
-            }
-        }
-    }
 
     // define the level with an array of tile indices
-    const int level2[] =
-    {
-        0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0,
-        0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0,
-        1, 1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3,
-        0, 1, 0, 0, 2, 0, 3, 3, 3, 0, 1, 1, 1, 0, 0, 0,
-        0, 1, 1, 0, 3, 3, 3, 0, 0, 0, 1, 1, 1, 2, 0, 0,
-        0, 0, 1, 0, 3, 0, 2, 2, 0, 0, 1, 1, 1, 1, 2, 0,
-        2, 0, 1, 0, 3, 0, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1,
-        0, 0, 1, 0, 3, 2, 2, 2, 0, 0, 0, 0, 1, 1, 1, 1,
-    };
+    std::vector<int> level;
 
-    TileMap map;
-    if (!map.load("./Sprites/tileset.png", sf::Vector2u(64, 64), level2, 16, 8))
-        return -1;
+    int levelSize = 2;
+    const int sizeOfMap = 36;
+    TileMap maps[sizeOfMap];
+    for (int i = 0; i < sizeOfMap; i++) {
+        for (int mapHeight = 0; mapHeight < 8 * levelSize; mapHeight++) 
+        {
+            for (int mapWidth = 0; mapWidth < 8 * levelSize; mapWidth++) {
+                MyFile.close();
+                if (dist6(rng) == 0) {
+                    level.push_back(0);
+                }
+                else {
+                    level.push_back(1);
+                }
+            }
+        }
+        TileMap x(1024 * (i % 6), 1024 * (i / 6));
+        if (!x.load("./Sprites/tileset.png", sf::Vector2u(64, 64), level, 8 * levelSize, 8 * levelSize))
+            return -1;
+        maps[i] = x;
+
+        level.clear();
+    }
 
     while (window.isOpen())
     {
@@ -138,8 +109,11 @@ int main()
         playerView.reset(sf::FloatRect(player.hitbox.getPosition().x - 512.f, player.hitbox.getPosition().y - 512.f, 1024.f, 1024.f));
         playerView.zoom(1.5f);
         playerView.setViewport(sf::FloatRect(0.f, 0.f, 1.f, 1.f));
+        sf::Vector2f viewCenter(playerView.getCenter());
+        sf::Vector2f viewSize(playerView.getSize());
+        sf::FloatRect currentViewRect(viewCenter - viewSize / 2.f, viewSize);
 
-        player.Update(window, map, playerView);
+        player.Update(window, maps, playerView);
         //for (Enemy enemy : level.enemies) {
         //    enemy.Update(window, level);
         //}
@@ -148,22 +122,19 @@ int main()
 
         window.clear();
 
-        sf::Vector2f viewCenter(playerView.getCenter());
-        sf::Vector2f viewSize(playerView.getSize());
-        sf::FloatRect currentViewRect(viewCenter - viewSize / 2.f, viewSize);
-        /*for (Wall wall : level.walls) {
-            auto rect = wall.collider.getGlobalBounds();
-            if (rect.intersects(currentViewRect)) {
-                window.draw(wall);
-            }
-        }
+        /*
         for (Enemy enemy : level.enemies) {
             auto rect = enemy.hitbox.getGlobalBounds();
             if (rect.intersects(currentViewRect)) {
                 window.draw(enemy);
             }
         }*/
-        window.draw(map);
+        for (int i = 0; i < sizeOfMap; i++) {
+            sf::FloatRect boundingBox(maps[i].getPosition().x, maps[i].getPosition().y, maps[i].width, maps[i].height);
+            if (boundingBox.intersects(playerView.getViewport())) {
+                window.draw(maps[i]);
+            }
+        }
         window.draw(player.sprite);
         window.display();
 

@@ -1,6 +1,8 @@
 #include "TileMap.h"
 
-bool TileMap::load(const std::string& tileset, sf::Vector2u tileSize, const int* tiles, unsigned int width, unsigned int height)
+TileMap::TileMap(int posX, int posY):posX(posX), posY(posY){}
+
+bool TileMap::load(const std::string& tileset, sf::Vector2u tileSize, std::vector<int> tiles, unsigned int width, unsigned int height)
 {
     this->width = width;
     this->height = height;
@@ -28,12 +30,12 @@ bool TileMap::load(const std::string& tileset, sf::Vector2u tileSize, const int*
             sf::Vertex* triangles = &m_vertices[(i + j * width) * 6];
 
             // define the 6 corners of the two triangles
-            triangles[0].position = sf::Vector2f(i * tileSize.x, j * tileSize.y);
-            triangles[1].position = sf::Vector2f((i + 1) * tileSize.x, j * tileSize.y);
-            triangles[2].position = sf::Vector2f(i * tileSize.x, (j + 1) * tileSize.y);
-            triangles[3].position = sf::Vector2f(i * tileSize.x, (j + 1) * tileSize.y);
-            triangles[4].position = sf::Vector2f((i + 1) * tileSize.x, j * tileSize.y);
-            triangles[5].position = sf::Vector2f((i + 1) * tileSize.x, (j + 1) * tileSize.y);
+            triangles[0].position = sf::Vector2f(i * tileSize.x + posX, j * tileSize.y + posY);
+            triangles[1].position = sf::Vector2f((i + 1) * tileSize.x + posX, j * tileSize.y + posY);
+            triangles[2].position = sf::Vector2f(i * tileSize.x + posX, (j + 1) * tileSize.y + posY);
+            triangles[3].position = sf::Vector2f(i * tileSize.x + posX, (j + 1) * tileSize.y + posY);
+            triangles[4].position = sf::Vector2f((i + 1) * tileSize.x + posX, j * tileSize.y + posY);
+            triangles[5].position = sf::Vector2f((i + 1) * tileSize.x + posX, (j + 1) * tileSize.y + posY);
 
             // define the 6 matching texture coordinates
             triangles[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
