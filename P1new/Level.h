@@ -11,5 +11,4 @@ class Level
 	public:
 		Level();
 		std::vector<Wall> walls;
-		std::vector<Enemy> enemies;
 };

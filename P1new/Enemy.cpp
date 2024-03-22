@@ -1,95 +1,85 @@
 #include "Enemy.h"
-#include <string>
-#include <math.h>
 #include <iostream>
-using namespace sf;
+EnemyMap::EnemyMap(){}
 
-Enemy::Enemy(std::string spritePath, int sizeX, int sizeY, int posX, int posY, sf::Clock& clock) :
-	sizeY(sizeY), sizeX(sizeX), clock(clock)
+bool EnemyMap::pushNewEnemy(const std::string& tileset, sf::Vector2u tileSize, int tileNumber, int posX, int posY)
 {
-	hitbox.setPosition(posX, posY);
-	hitbox.setSize(sf::Vector2f(sizeX, sizeY));
-	movementSpeed = 5;
-	health = 100;
-	if (!texture.loadFromFile(spritePath))
-	{
-		throw std::invalid_argument("Missing file/Invalid path to Player sprite specified");
-	}
-	else {
-		sprite.setTexture(texture);
-		sprite.setPosition(posX, posY);
-	}
-};
+    // load the tileset texture
+    if (!m_tileset.loadFromFile(tileset))
+        return false;
 
-void Enemy::Update(sf::RenderWindow& window, Level level) {
-	horizontal = 0;
-	vertical = 0;
+    // resize the vertex array to fit the level size
+    m_vertices.setPrimitiveType(sf::Triangles);
+    m_vertices.resize(m_vertices.getVertexCount() + 6);
 
-	if (Keyboard::isKeyPressed(Keyboard::J)) horizontal -= 1;
-	if (Keyboard::isKeyPressed(Keyboard::L)) horizontal += 1;
-	if (Keyboard::isKeyPressed(Keyboard::I)) vertical -= 1;
-	if (Keyboard::isKeyPressed(Keyboard::K)) vertical += 1;
+    // populate the vertex array, with two triangles per tile
+    // find its position in the tileset texture
+    int tu = tileNumber % (m_tileset.getSize().x / tileSize.x);
+    int tv = tileNumber / (m_tileset.getSize().x / tileSize.x);
 
+    // get a pointer to the triangles' vertices of the current tile
+    sf::Vertex* triangles = &m_vertices[amountOfEnemies * 6];
 
-	/* ENEMY MOVEMENT HERE
-	if (Keyboard::isKeyPressed(Keyboard::A)) horizontal -= 1;
-	if (Keyboard::isKeyPressed(Keyboard::D)) horizontal += 1;
-	if (Keyboard::isKeyPressed(Keyboard::W)) vertical -= 1;
-	if (Keyboard::isKeyPressed(Keyboard::S)) vertical += 1;
-	*/
+    // define the 6 corners of the two triangles
+    triangles[0].position = sf::Vector2f(posX, posY);
+    triangles[1].position = sf::Vector2f(tileSize.x + posX, posY);
+    triangles[2].position = sf::Vector2f(posX, tileSize.y + posY);
+    triangles[3].position = sf::Vector2f(posX, tileSize.y + posY);
+    triangles[4].position = sf::Vector2f(tileSize.x + posX, posY);
+    triangles[5].position = sf::Vector2f(tileSize.x + posX, tileSize.y + posY);
 
-	if (horizontal != 0 && vertical != 0) {
-		sprite.move(horizontal * movementSpeed * diagMod, vertical * movementSpeed * diagMod);
-		hitbox.move(horizontal * movementSpeed * diagMod, vertical * movementSpeed * diagMod);
-	}
-	else {
-		sprite.move(horizontal * movementSpeed, vertical * movementSpeed);
-		hitbox.move(horizontal * movementSpeed, vertical * movementSpeed);
-	}
+    // define the 6 matching texture coordinates
+    triangles[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
+    triangles[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
+    triangles[2].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+    triangles[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+    triangles[4].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
+    triangles[5].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
 
-	sf::FloatRect overlap;
-	sf::FloatRect enemyBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
-	for (int i = 0; i < level.walls.size(); i++)
-	{
-		sf::FloatRect collisionNormal;
-		if (level.walls[i].collider.getGlobalBounds().intersects(enemyBounds, overlap)) {
-			collisionNormal = overlap;
-			resolveCollision(overlap, level.walls[i].collider);
-			enemyBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
-		}
-	}
-};
+    amountOfEnemies += 1;
 
-void Enemy::resolveCollision(sf::FloatRect collisionNormal, sf::RectangleShape collided) {
-	sf::Vector2f colSize = collisionNormal.getSize();
-	sf::Vector2f enemyPos = hitbox.getPosition();
-	sf::Vector2f collidedPos = collided.getPosition();
-	colSize.x = -colSize.x;
-	colSize.y = -colSize.y;
-
-	if (horizontal != 0 && vertical != 0) {
-		if (colSize.x <= colSize.y) {		//Colliding from top/bottom diagonal
-			this->sprite.move(0, colSize.y * vertical);
-			this->hitbox.move(0, colSize.y * vertical);
-		}
-		else if (colSize.x >= colSize.y) {		//Colliding from left/right diagonal
-			this->sprite.move(colSize.x * horizontal, 0);
-			this->hitbox.move(colSize.x * horizontal, 0);
-		}
-	}
-	else {
-		if (vertical == 0 && horizontal != 0) { //Colliding from left/right
-			this->sprite.move(colSize.x * horizontal, 0);
-			this->hitbox.move(colSize.x * horizontal, 0);
-		}
-		else if (horizontal == 0 && vertical != 0) { //Colliding from top/bottom
-			this->sprite.move(0, colSize.y * vertical);
-			this->hitbox.move(0, colSize.y * vertical);
-		}
-	}
+    return true;
 }
 
-void Enemy::draw(sf::RenderTarget& target, sf::RenderStates states)const {
-	target.draw(hitbox);
-	target.draw(sprite);
+sf::Vector2f EnemyMap::normalize(sf::Vector2f delta) {
+    if (delta.x == 0.0 && delta.y == 0.0)
+        return sf::Vector2f(0.0,0.0);
+
+    return delta / std::sqrt(delta.x * delta.x + delta.y * delta.y);
+}
+
+void EnemyMap::Update(sf::RenderWindow& window, sf::View playerView, Player player) {
+    for (int i = 0; i < amountOfEnemies; i++) {
+        sf::Vertex* triangles = &m_vertices[i * 6];
+        sf::Vector2f delta = sf::Vector2f(player.getPosition().x - triangles[0].position.x, player.getPosition().y - triangles[0].position.y);
+        float m = (player.getPosition().y - triangles[0].position.y) / (player.getPosition().x - triangles[0].position.x);
+        std::cout << m << std::endl;
+        for (int j = 0; j < 6; j++) {
+            if (delta.x*delta.x+delta.y*delta.y < speed * speed)
+            {
+                // set to target if our speed would go beyond the target
+                triangles[j].position.x = player.getPosition().x;
+                triangles[j].position.y = player.getPosition().y;
+            }
+            else {
+                triangles[j].position.x += speed * normalize(delta).x;
+                triangles[j].position.y += speed * normalize(delta).y;
+            }
+        }
+    }
+}
+
+void EnemyMap::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+    // apply the transform
+    states.transform *= getTransform();
+
+    // apply the tileset texture
+    states.texture = &m_tileset;
+
+    // draw the vertex array
+    target.draw(m_vertices, states);
+}
+
+sf::VertexArray EnemyMap::getVertices() {
+    return this->m_vertices;
 }

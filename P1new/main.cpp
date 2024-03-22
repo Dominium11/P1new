@@ -1,8 +1,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include "Player.h"
-#include "Level.h"
 #include "TileMap.h"
+#include "Enemy.h"
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -64,23 +64,32 @@ int main()
     std::mt19937 rng(rand());
     std::uniform_int_distribution<std::mt19937::result_type> dist6(0, 19); // amount of levels
 
-
     // define the level with an array of tile indices
     std::vector<int> level;
 
     int levelSize = 2;
     const int sizeOfMap = 36;
     TileMap maps[sizeOfMap];
+    EnemyMap eMap;
+    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 0, 0);
+    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 64, 64);
+    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 128, 128);
+    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 128*2, 128*2);
+    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 128, 128);
+    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 128, 128);
     for (int i = 0; i < sizeOfMap; i++) {
         for (int mapHeight = 0; mapHeight < 8 * levelSize; mapHeight++) 
         {
             for (int mapWidth = 0; mapWidth < 8 * levelSize; mapWidth++) {
                 MyFile.close();
                 if (dist6(rng) == 0) {
-                    level.push_back(0);
+                    level.push_back(0); //Nothing
+                }
+                else if (dist6(rng) == 1) {
+                    level.push_back(1); //Enemy spawner
                 }
                 else {
-                    level.push_back(1);
+                    level.push_back(1); //Wall
                 }
             }
         }
@@ -114,6 +123,7 @@ int main()
         sf::FloatRect currentViewRect(viewCenter - viewSize / 2.f, viewSize);
 
         player.Update(window, maps, playerView);
+        eMap.Update(window, playerView, player);
         //for (Enemy enemy : level.enemies) {
         //    enemy.Update(window, level);
         //}
@@ -135,6 +145,7 @@ int main()
                 window.draw(maps[i]);
             }
         }
+        window.draw(eMap);
         window.draw(player.sprite);
         window.display();
 

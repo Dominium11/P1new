@@ -21,7 +21,7 @@ sizeY(sizeY), sizeX(sizeX), clock(clock)
 	}
 };
 
-void Player::Update(sf::RenderWindow &window, TileMap map[2], sf::View playerView) {
+void Player::Update(sf::RenderWindow &window, TileMap map[], sf::View playerView) {
 	horizontal = 0;
 	vertical = 0;
 	if (Keyboard::isKeyPressed(Keyboard::A)) horizontal -= 1;
@@ -115,4 +115,7 @@ void Player::resolveCollision(sf::FloatRect collisionNormal, sf::FloatRect colli
 	}
 }
 
+sf::Vector2f Player::getPosition() {
+	return hitbox.getGlobalBounds().getPosition();
+}
 
