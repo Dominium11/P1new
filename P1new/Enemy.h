@@ -9,7 +9,7 @@ public:
 	EnemyMap();
 	sf::VertexArray getVertices();
 	bool pushNewEnemy(const std::string& tileset, sf::Vector2u tileSize, int tiles, int posX, int posY);
-	void Update(sf::RenderWindow& window, sf::View playerView, Player player);
+	void Update(sf::RenderWindow& window, sf::View playerView, Player player, TileMap map[]);
 private:
 	sf::Vector2f normalize(sf::Vector2f);
 	int amountOfEnemies = 0;

@@ -1,5 +1,6 @@
 #include "TileMap.h"
 
+
 TileMap::TileMap(int posX, int posY):posX(posX), posY(posY){}
 
 bool TileMap::load(const std::string& tileset, sf::Vector2u tileSize, std::vector<int> tiles, unsigned int width, unsigned int height)

@@ -123,7 +123,7 @@ int main()
         sf::FloatRect currentViewRect(viewCenter - viewSize / 2.f, viewSize);
 
         player.Update(window, maps, playerView);
-        eMap.Update(window, playerView, player);
+        eMap.Update(window, playerView, player, maps);
         //for (Enemy enemy : level.enemies) {
         //    enemy.Update(window, level);
         //}

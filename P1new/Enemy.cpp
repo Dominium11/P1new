@@ -48,7 +48,7 @@ sf::Vector2f EnemyMap::normalize(sf::Vector2f delta) {
     return delta / std::sqrt(delta.x * delta.x + delta.y * delta.y);
 }
 
-void EnemyMap::Update(sf::RenderWindow& window, sf::View playerView, Player player) {
+void EnemyMap::Update(sf::RenderWindow& window, sf::View playerView, Player player, TileMap map[]) {
     for (int i = 0; i < amountOfEnemies; i++) {
         sf::Vertex* triangles = &m_vertices[i * 6];
         sf::Vector2f delta = sf::Vector2f(player.getPosition().x - triangles[0].position.x, player.getPosition().y - triangles[0].position.y);
