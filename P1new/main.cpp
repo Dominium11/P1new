@@ -71,12 +71,6 @@ int main()
     const int sizeOfMap = 36;
     TileMap maps[sizeOfMap];
     EnemyMap eMap;
-    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 0, 0);
-    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 64, 64);
-    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 128, 128);
-    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 128*2, 128*2);
-    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 128, 128);
-    eMap.pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, 128, 128);
     for (int i = 0; i < sizeOfMap; i++) {
         for (int mapHeight = 0; mapHeight < 8 * levelSize; mapHeight++) 
         {
@@ -122,23 +116,13 @@ int main()
         sf::Vector2f viewSize(playerView.getSize());
         sf::FloatRect currentViewRect(viewCenter - viewSize / 2.f, viewSize);
 
-        player.Update(window, maps, playerView);
+        player.Update(window, maps, playerView, eMap);
         eMap.Update(window, playerView, player, maps);
-        //for (Enemy enemy : level.enemies) {
-        //    enemy.Update(window, level);
-        //}
 
         window.setView(playerView);
 
         window.clear();
 
-        /*
-        for (Enemy enemy : level.enemies) {
-            auto rect = enemy.hitbox.getGlobalBounds();
-            if (rect.intersects(currentViewRect)) {
-                window.draw(enemy);
-            }
-        }*/
         for (int i = 0; i < sizeOfMap; i++) {
             sf::FloatRect boundingBox(maps[i].getPosition().x, maps[i].getPosition().y, maps[i].width, maps[i].height);
             if (boundingBox.intersects(playerView.getViewport())) {

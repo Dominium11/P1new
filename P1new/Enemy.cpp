@@ -1,6 +1,12 @@
 #include "Enemy.h"
 #include <iostream>
+#include <random>
 EnemyMap::EnemyMap(){}
+
+//This should go in .init() later
+std::random_device rnd;
+std::mt19937 rng(rnd());
+std::uniform_int_distribution<std::mt19937::result_type> dist6(100, 300); // amount of levels
 
 bool EnemyMap::pushNewEnemy(const std::string& tileset, sf::Vector2u tileSize, int tileNumber, int posX, int posY)
 {
@@ -49,11 +55,22 @@ sf::Vector2f EnemyMap::normalize(sf::Vector2f delta) {
 }
 
 void EnemyMap::Update(sf::RenderWindow& window, sf::View playerView, Player player, TileMap map[]) {
+    std::cout << amountOfEnemies << std::endl;
+    sf::Vector2f playerPos = player.getPosition();
+    int sign = 0;
+    if (dist6(rng)>900){
+        sign = -1;
+    }
+    else {
+        sign = 1;
+    }
+    if (amountOfEnemies < 10) {
+        pushNewEnemy("./Sprites/tileset.png", sf::Vector2u(64, 64), 2, playerPos.x + dist6(rng) * sign, playerPos.y + dist6(rng) * sign);
+    }
     for (int i = 0; i < amountOfEnemies; i++) {
         sf::Vertex* triangles = &m_vertices[i * 6];
         sf::Vector2f delta = sf::Vector2f(player.getPosition().x - triangles[0].position.x, player.getPosition().y - triangles[0].position.y);
         float m = (player.getPosition().y - triangles[0].position.y) / (player.getPosition().x - triangles[0].position.x);
-        std::cout << m << std::endl;
         for (int j = 0; j < 6; j++) {
             if (delta.x*delta.x+delta.y*delta.y < speed * speed)
             {
@@ -66,6 +83,18 @@ void EnemyMap::Update(sf::RenderWindow& window, sf::View playerView, Player play
                 triangles[j].position.y += speed * normalize(delta).y;
             }
         }
+    }    
+}
+
+int EnemyMap::getAmountOfEnemies() {
+    return this->amountOfEnemies;
+}
+
+void EnemyMap::deleteEnemy(int verticeIndex) {
+    sf::Vertex* triangles = &m_vertices[verticeIndex];
+
+    for (int i = 0; i < 6; i++){
+        triangles[i].position.x = 100;
     }
 }
 

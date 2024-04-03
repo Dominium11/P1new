@@ -3,6 +3,11 @@
 #include <vector>
 #include "Player.h"
 
+class Player;
+
+#ifndef ENEMY
+#define ENEMY
+
 class EnemyMap : public sf::Drawable, public sf::Transformable
 {
 public:
@@ -10,6 +15,8 @@ public:
 	sf::VertexArray getVertices();
 	bool pushNewEnemy(const std::string& tileset, sf::Vector2u tileSize, int tiles, int posX, int posY);
 	void Update(sf::RenderWindow& window, sf::View playerView, Player player, TileMap map[]);
+	void deleteEnemy(int verticeIndex);
+	int getAmountOfEnemies();
 private:
 	sf::Vector2f normalize(sf::Vector2f);
 	int amountOfEnemies = 0;
@@ -20,5 +27,6 @@ private:
 	int posX, posY;
 };
 
+#endif
 
 

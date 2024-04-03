@@ -21,7 +21,7 @@ sizeY(sizeY), sizeX(sizeX), clock(clock)
 	}
 };
 
-void Player::Update(sf::RenderWindow &window, TileMap map[], sf::View playerView) {
+void Player::Update(sf::RenderWindow &window, TileMap map[], sf::View playerView, EnemyMap &eMap) {
 	horizontal = 0;
 	vertical = 0;
 	if (Keyboard::isKeyPressed(Keyboard::A)) horizontal -= 1;
@@ -62,7 +62,6 @@ void Player::Update(sf::RenderWindow &window, TileMap map[], sf::View playerView
 			if (((i / 6) % level.width == 0)) {
 				offset += 1;
 			}
-			auto rect = level.getVertices().getBounds();
 			sf::FloatRect boundingBox(vertices[i].position.x, vertices[i].position.y, vertices[i + 1].position.x - vertices[i].position.x, vertices[i + 2].position.y - vertices[i].position.y);
 			if (boundingBox.intersects(currentViewRect)) {
 				if (boundingBox.intersects(playerBounds, overlap) && tileId == 0) {
@@ -73,17 +72,15 @@ void Player::Update(sf::RenderWindow &window, TileMap map[], sf::View playerView
 			}
 		}
 	}
-
-	/*for (Enemy enemy : level.enemies) {
-		auto rect = enemy.hitbox.getGlobalBounds();
-		if (rect.intersects(currentViewRect)) {
-			if (enemy.hitbox.getGlobalBounds().intersects(playerBounds, overlap)) {
-				collisionNormal = overlap;
-				resolveCollision(overlap, enemy.hitbox);
-				playerBounds = hitbox.getTransform().transformRect(hitbox.getLocalBounds());
-			}
+	for (int m = 0; m < eMap.getVertices().getVertexCount(); m+=6) {
+		std::cout << " GOT HERE " << std::endl;
+		sf::VertexArray vertices = eMap.getVertices();
+		sf::FloatRect boundingBox(vertices[m].position.x, vertices[m].position.y, vertices[m + 1].position.x - vertices[m].position.x, vertices[m + 2].position.y - vertices[m].position.y);
+		if (boundingBox.intersects(playerBounds, overlap)) {
+			eMap.deleteEnemy(m);	//FIX THIS
+			break;
 		}
-	}*/
+	}
 };
 
 void Player::resolveCollision(sf::FloatRect collisionNormal, sf::FloatRect collided) {
